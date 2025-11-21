@@ -28,3 +28,7 @@ args = "./run-game.sh"
 
 [workflows.workflow.metadata]
 outputType = "vnc"
+
+[deployment]
+run = ["bash", "run-game.sh"]
+deploymentTarget = "vm"

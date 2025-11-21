@@ -22,11 +22,40 @@ Red Alert .5 is an OpenRA mod that aims to create a campaign set around 1936 to 
 - ✅ VNC workflow configured for desktop game display
 - ✅ Build system configured for Replit environment
 
-### Known Issues
-- ⚠️ Mod DLLs (OpenRA.Mods.AS.dll, OpenRA.Mods.RA05.dll) not building
-  - These target .NET Framework 4.6.1 which has limited support on Linux
-  - Added Microsoft.NETFramework.ReferenceAssemblies package but build still incomplete
-  - Game will fail to launch until these DLLs are successfully compiled
+### Known Issues - Mod DLL Compilation
+
+**Critical:** Mod DLLs are not being produced by the build system, preventing the game from launching.
+
+**Missing Files:**
+- `mods/radot5/OpenRA.Mods.RA05.dll` - Custom mod code
+- `engine/mods/common/OpenRA.Mods.Common.dll` - Common mod framework
+- `engine/mods/as/OpenRA.Mods.AS.dll` - Advanced Support mod dependency
+- `engine/OpenRA.Game.dll` - Core game library
+
+**Root Cause:**
+.NET Framework 4.6.1 class library projects are not compiling on Linux in the Replit environment. The build system completes without errors but skips the CoreCompile step, producing no DLL output files.
+
+**Troubleshooting Attempted:**
+1. ✅ Fixed OutputPath settings (added trailing slashes)
+2. ✅ Deleted all obj/bin directories to clear incremental cache
+3. ✅ Used `-t:Rebuild` to force complete rebuild
+4. ✅ Set `-p:DesignTimeBuild=false -p:SkipCompilerExecution=false`
+5. ✅ Updated msbuild wrapper to include correct build flags
+6. ✅ Restored NuGet packages before builds
+7. ❌ xbuild doesn't support SDK-style projects
+8. ❌ Manual mcs compilation not attempted (complex dependency chain)
+
+**What Works:**
+- Engine EXE files compile successfully (OpenRA.Server.exe, OpenRA.Utility.exe)
+- Third-party DLLs are present
+- Build system configuration is correct
+- All dependencies are installed
+
+**Possible Next Steps:**
+1. Retarget projects to .NET 6+ or netstandard2.0 (requires OpenRA engine modifications)
+2. Pre-compile DLLs on Windows and commit them to the repository
+3. Use a different build environment that supports .NET Framework better
+4. Investigate using Mono's native compiler (mcs) for manual compilation
 
 ## Building the Project
 

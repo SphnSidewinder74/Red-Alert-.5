@@ -32,3 +32,4 @@ outputType = "vnc"
 [deployment]
 run = ["bash", "run-game.sh"]
 deploymentTarget = "vm"
+build = ["make", "all"]

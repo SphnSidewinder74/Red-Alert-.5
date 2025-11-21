@@ -1,0 +1,30 @@
+modules = ["bash", "lua-5.2", "dotnet-7.0", "python-3.11"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+packages = ["mono", "SDL2", "openal", "freetype", "zlib", "libpng", "unzip", "lua5_1", "pkg-config"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Red Alert .5"
+
+[[workflows.workflow]]
+name = "Red Alert .5"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./run-game.sh"
+
+[workflows.workflow.metadata]
+outputType = "vnc"

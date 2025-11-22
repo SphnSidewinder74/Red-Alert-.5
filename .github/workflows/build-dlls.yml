@@ -43,7 +43,8 @@ jobs:
     - name: Upload DLLs as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: compiled-dlls
+        name: compiled-dlls 
+        Copy-Item -Path "engine\mods\cnc\OpenRA.Mods.Cnc.dll" -Destination "dll-output\" -ErrorAction SilentlyContinue
         path: dll-output/*.dll
         retention-days: 90
         
@@ -61,3 +62,10 @@ jobs:
         git add -f engine/OpenRA.Platforms.Default.dll engine/mods/common/OpenRA.Mods.Common.dll engine/mods/as/OpenRA.Mods.AS.dll mods/radot5/OpenRA.Mods.RA05.dll
         git diff --staged --quiet || git commit -m "Auto-build: Update compiled DLLs from Windows build"
         git push
+Copy-Item -Path "dll-output\OpenRA.Mods.Cnc.dll" -Destination "engine\mods\cnc\" -Force -ErrorAction SilentlyContinue
+
+
+
+
+
+git add -f engine/OpenRA.Platforms.Default.dll engine/mods/common/OpenRA.Mods.Common.dll engine/mods/cnc/OpenRA.Mods.Cnc.dll engine/mods/as/OpenRA.Mods.AS.dll mods/radot5/OpenRA.Mods.RA05.dll

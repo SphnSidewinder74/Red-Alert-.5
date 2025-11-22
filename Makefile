@@ -38,7 +38,7 @@ HAS_LUAC = $(shell command -v luac 2> /dev/null)
 LUA_FILES = $(shell find mods/*/maps/* -iname '*.lua' 2> /dev/null)
 MOD_SOLUTION_FILES = $(shell find . -maxdepth 1 -iname '*.sln' 2> /dev/null)
 
-MSBUILD = msbuild -verbosity:m -nologo
+MSBUILD = dotnet msbuild -p:DesignTimeBuild=false -p:SkipCompilerExecution=false -verbosity:m -nologo
 
 # Enable 32 bit builds while generating the windows installer
 WIN32 = false

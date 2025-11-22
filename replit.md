@@ -107,6 +107,17 @@ Key environment variables set in `run-game.sh`:
 - Check that all NuGet packages restored successfully
 
 ## Recent Changes
+
+- 2024-11-22: Deployment Configuration and Build System Fixes
+  - ✅ Fixed Makefile to use `dotnet msbuild` directly (works in deployment environment)
+  - ✅ Fixed engine/Makefile with same msbuild configuration
+  - ✅ Updated engine/thirdparty/configure-native-deps.sh to detect Lua 5.1 in Nix store
+  - ✅ Configured deployment as Reserved VM (correct for desktop game)
+  - ✅ Set build command to `make all` for deployment
+  - ✅ Successfully ran `make dependencies` - all third-party packages fetched
+  - ✅ OpenRA.Game.exe now compiles successfully
+  - ❌ Mod DLLs still not being produced (persistent .NET Framework 4.6.1 issue)
+
 - 2024-11-21: Initial Replit setup
   - Configured build system for Linux environment
   - Added dependency installation

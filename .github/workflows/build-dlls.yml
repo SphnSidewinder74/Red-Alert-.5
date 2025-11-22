@@ -1,62 +1,32 @@
-name: Build DLLs on Windows
-
-on:
-  push:
-    branches: [ master, replit-agent ]
-    paths:
-      - 'OpenRA.Mods.RA05/**'
-      - 'mod.config'
-      - '.github/workflows/build-dlls.yml'
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: windows-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET Framework
-      uses: microsoft/setup-msbuild@v1.1
-      
-    - name: Fetch OpenRA engine
-      shell: cmd
-      run: |
-        call fetch-engine.sh
-        
-    - name: Build mod DLLs
-      shell: cmd
-      run: |
-        call make.cmd all
-        
-    - name: Collect DLLs
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Force -Path dll-output
-        Copy-Item -Path "engine\OpenRA.Game.dll" -Destination "dll-output\" -ErrorAction SilentlyContinue
-        Copy-Item -Path "engine\mods\common\OpenRA.Mods.Common.dll" -Destination "dll-output\" -ErrorAction SilentlyContinue
-        Copy-Item -Path "engine\mods\as\OpenRA.Mods.AS.dll" -Destination "dll-output\" -ErrorAction SilentlyContinue
-        Copy-Item -Path "mods\radot5\OpenRA.Mods.RA05.dll" -Destination "dll-output\" -ErrorAction SilentlyContinue
-        Get-ChildItem dll-output
-        
-    - name: Upload DLLs as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: compiled-dlls
-        path: dll-output/*.dll
-        retention-days: 90
-        
     - name: Commit DLLs to repository
       shell: pwsh
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         
-        Copy-Item -Path "dll-output\OpenRA.Game.dll" -Destination "engine\" -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "dll-output\OpenRA.Mods.Common.dll" -Destination "engine\mods\common\" -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "dll-output\OpenRA.Mods.AS.dll" -Destination "engine\mods\as\" -Force -ErrorAction SilentlyContinue
-        Copy-Item -Path "dll-output\OpenRA.Mods.RA05.dll" -Destination "mods\radot5\" -Force -ErrorAction SilentlyContinue
+        # Create directories if they don't exist
+        New-Item -ItemType Directory -Force -Path "engine"
+        New-Item -ItemType Directory -Force -Path "engine\mods\common"
+        New-Item -ItemType Directory -Force -Path "engine\mods\as"
+        New-Item -ItemType Directory -Force -Path "mods\radot5"
+        
+        # Check if DLLs were built
+        if (Test-Path "dll-output\OpenRA.Game.dll") {
+          Copy-Item -Path "dll-output\OpenRA.Game.dll" -Destination "engine\" -Force
+          Write-Host "Copied OpenRA.Game.dll"
+        }
+        if (Test-Path "dll-output\OpenRA.Mods.Common.dll") {
+          Copy-Item -Path "dll-output\OpenRA.Mods.Common.dll" -Destination "engine\mods\common\" -Force
+          Write-Host "Copied OpenRA.Mods.Common.dll"
+        }
+        if (Test-Path "dll-output\OpenRA.Mods.AS.dll") {
+          Copy-Item -Path "dll-output\OpenRA.Mods.AS.dll" -Destination "engine\mods\as\" -Force
+          Write-Host "Copied OpenRA.Mods.AS.dll"
+        }
+        if (Test-Path "dll-output\OpenRA.Mods.RA05.dll") {
+          Copy-Item -Path "dll-output\OpenRA.Mods.RA05.dll" -Destination "mods\radot5\" -Force
+          Write-Host "Copied OpenRA.Mods.RA05.dll"
+        }
         
         git add -f engine/OpenRA.Game.dll engine/mods/common/OpenRA.Mods.Common.dll engine/mods/as/OpenRA.Mods.AS.dll mods/radot5/OpenRA.Mods.RA05.dll
         git diff --staged --quiet || git commit -m "Auto-build: Update compiled DLLs from Windows build"

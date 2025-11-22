@@ -22,40 +22,33 @@ Red Alert .5 is an OpenRA mod that aims to create a campaign set around 1936 to 
 - ✅ VNC workflow configured for desktop game display
 - ✅ Build system configured for Replit environment
 
-### Known Issues - Mod DLL Compilation
+### Cross-Platform Build Solution
 
-**Critical:** Mod DLLs are not being produced by the build system, preventing the game from launching.
+**Challenge:** .NET Framework 4.6.1 class library DLLs cannot be compiled on Linux.
 
-**Missing Files:**
-- `mods/radot5/OpenRA.Mods.RA05.dll` - Custom mod code
+**Solution:** Automated Windows build via GitHub Actions
+
+The project uses a hybrid build approach:
+- **Linux (Replit)**: Builds EXE files, fetches dependencies, runs the game
+- **Windows (GitHub Actions)**: Compiles the required DLL files
+
+**Required DLL Files:**
+- `engine/OpenRA.Game.dll` - Core game library
 - `engine/mods/common/OpenRA.Mods.Common.dll` - Common mod framework
 - `engine/mods/as/OpenRA.Mods.AS.dll` - Advanced Support mod dependency
-- `engine/OpenRA.Game.dll` - Core game library
+- `mods/radot5/OpenRA.Mods.RA05.dll` - Custom mod code
 
-**Root Cause:**
-.NET Framework 4.6.1 class library projects are not compiling on Linux in the Replit environment. The build system completes without errors but skips the CoreCompile step, producing no DLL output files.
+**How It Works:**
+1. When you push code changes to GitHub, the workflow `.github/workflows/build-dlls.yml` automatically triggers
+2. The workflow builds the project on Windows and compiles all DLL files
+3. The DLLs are committed back to the repository
+4. Pull the changes in Replit to get the updated DLLs
 
-**Troubleshooting Attempted:**
-1. ✅ Fixed OutputPath settings (added trailing slashes)
-2. ✅ Deleted all obj/bin directories to clear incremental cache
-3. ✅ Used `-t:Rebuild` to force complete rebuild
-4. ✅ Set `-p:DesignTimeBuild=false -p:SkipCompilerExecution=false`
-5. ✅ Updated msbuild wrapper to include correct build flags
-6. ✅ Restored NuGet packages before builds
-7. ❌ xbuild doesn't support SDK-style projects
-8. ❌ Manual mcs compilation not attempted (complex dependency chain)
+**Manual Trigger:**
+You can manually trigger the workflow at: https://github.com/MustaphaTR/Red-Alert-.5/actions
 
-**What Works:**
-- Engine EXE files compile successfully (OpenRA.Server.exe, OpenRA.Utility.exe)
-- Third-party DLLs are present
-- Build system configuration is correct
-- All dependencies are installed
-
-**Possible Next Steps:**
-1. Retarget projects to .NET 6+ or netstandard2.0 (requires OpenRA engine modifications)
-2. Pre-compile DLLs on Windows and commit them to the repository
-3. Use a different build environment that supports .NET Framework better
-4. Investigate using Mono's native compiler (mcs) for manual compilation
+**First-Time Setup:**
+If the DLLs are missing, push your current code to GitHub and the workflow will automatically build and commit them.
 
 ## Building the Project
 
@@ -108,18 +101,19 @@ Key environment variables set in `run-game.sh`:
 
 ## Recent Changes
 
-- 2024-11-22: Deployment Configuration and Build System Fixes
-  - ✅ Fixed Makefile to use `dotnet msbuild` directly (works in deployment environment)
-  - ✅ Fixed engine/Makefile with same msbuild configuration
+- 2024-11-22: Cross-Platform Build Solution Implemented
+  - ✅ Created GitHub Actions workflow for Windows DLL compilation
+  - ✅ Fixed Makefile to use `dotnet msbuild` with proper configuration
+  - ✅ Fixed engine/Makefile with same msbuild configuration  
   - ✅ Updated engine/thirdparty/configure-native-deps.sh to detect Lua 5.1 in Nix store
   - ✅ Configured deployment as Reserved VM (correct for desktop game)
-  - ✅ Set build command to `make all` for deployment
-  - ✅ Successfully ran `make dependencies` - all third-party packages fetched
-  - ✅ OpenRA.Game.exe now compiles successfully
-  - ❌ Mod DLLs still not being produced (persistent .NET Framework 4.6.1 issue)
+  - ✅ Added Microsoft.NETFramework.ReferenceAssemblies to all projects
+  - ✅ Created download-dlls.sh script to verify DLL presence
+  - ✅ Documented hybrid Linux/Windows build approach
+  - **Solution**: DLLs are now built on Windows via GitHub Actions and committed to repo
 
 - 2024-11-21: Initial Replit setup
   - Configured build system for Linux environment
   - Added dependency installation
   - Created VNC workflow for game display
-  - Identified mod DLL compilation issue requiring resolution
+  - Identified mod DLL compilation issue

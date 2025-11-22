@@ -7,6 +7,12 @@ mods/*/*.mdb
 mods/*/*.pdb
 /*.dll
 /*.dll.config
+
+# Exception: Allow critical DLL files needed for Linux builds
+!engine/OpenRA.Game.dll
+!engine/mods/common/OpenRA.Mods.Common.dll
+!engine/mods/as/OpenRA.Mods.AS.dll
+!mods/radot5/OpenRA.Mods.RA05.dll
 /*.so
 /*.dylib
 /*.pdb
